@@ -5,7 +5,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+
 
 # Precompiled Headers
 *.gch
@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+#for visual studio
+.vs
+.vcxproj
+.vcxproj.filters
+.vcxproj.user
+
+#folders
+
+
