@@ -15,6 +15,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(char const* path, bool gammaCorrection);
 GLuint loadCubemap(std::vector<std::string> faces);
+void bindModelVAO(Model model);
 
 const unsigned int SCR_WIDTH = 1920; 
 const unsigned int SCR_HEIGHT = 1080;
@@ -67,6 +68,11 @@ int main(int, char**) {
     Model mercury("objects/mercury/mercury.obj");
     Model venus("objects/venus/venus.obj");
     Model earth("objects/earth/earth.obj");
+    Model mars("objects/mars/mars.obj");
+    Model jupiter("objects/jupiter/jupiter.obj");
+    Model saturn("objects/saturn/saturn.obj");
+    Model uranus("objects/uranus/uranus.obj");
+    Model neptune("objects/neptune/neptune.obj");
 
     //GLuint amount = 10000;
     //glm::mat4* modelMatrices;
@@ -103,93 +109,23 @@ int main(int, char**) {
     //glBindBuffer(GL_ARRAY_BUFFER, buffer);
     //glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
 
-    for (GLuint i = 0; i < sun.meshes.size(); i++)
-    {
-        GLuint VAO = sun.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+    bindModelVAO(sun);
 
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
+    bindModelVAO(mercury);
 
-        glBindVertexArray(0);
-    }
+    bindModelVAO(venus);
 
-    for (GLuint i = 0; i < mercury.meshes.size(); i++)
-    {
-        GLuint VAO = mercury.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+    bindModelVAO(earth);
 
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
+    bindModelVAO(mars);
 
-        glBindVertexArray(0);
-    }
+    bindModelVAO(jupiter);
 
-    for (GLuint i = 0; i < venus.meshes.size(); i++)
-    {
-        GLuint VAO = venus.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+    bindModelVAO(saturn);
 
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
+    bindModelVAO(uranus);
 
-        glBindVertexArray(0);
-    }
-
-    for (GLuint i = 0; i < earth.meshes.size(); i++)
-    {
-        GLuint VAO = earth.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // set attribute pointers for matrix (4 times vec4)
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
-
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-
-        glBindVertexArray(0);
-    }
+    bindModelVAO(neptune);
 
 
     while (!glfwWindowShouldClose(window))
@@ -242,6 +178,35 @@ int main(int, char**) {
         shaderPlanet.set("model", model);
         earth.Draw(shaderPlanet);
 
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 400.0f));
+        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        shaderPlanet.set("model", model);
+        mars.Draw(shaderPlanet);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 500.0f));
+        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        shaderPlanet.set("model", model);
+        jupiter.Draw(shaderPlanet);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 600.0f));
+        model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+        shaderPlanet.set("model", model);  
+        saturn.Draw(shaderPlanet);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 700.0f));
+        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        shaderPlanet.set("model", model);
+        uranus.Draw(shaderPlanet);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 800.0f));
+        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        shaderPlanet.set("model", model);
+        neptune.Draw(shaderPlanet);
     
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -388,4 +353,29 @@ GLuint loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+void bindModelVAO(Model model)
+{
+    for (GLuint i = 0; i < model.meshes.size(); i++)
+    {
+        GLuint VAO = model.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // set attribute pointers for matrix (4 times vec4)
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
 }
