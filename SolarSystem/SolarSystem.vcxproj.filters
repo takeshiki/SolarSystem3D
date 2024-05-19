@@ -52,5 +52,11 @@
     <None Include="src\glsl\sun_fragment.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="src\glsl\planet_fragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="src\glsl\planet_vertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

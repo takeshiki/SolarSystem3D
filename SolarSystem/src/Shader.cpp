@@ -106,6 +106,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
 	checkCompileErrors(vertex, "VERTEX");
+	std::cout << vertexPath << std::endl;
+
 
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);

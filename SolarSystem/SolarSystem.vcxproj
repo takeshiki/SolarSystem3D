@@ -32,6 +32,8 @@
     <ClInclude Include="src\Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\glsl\planet_fragment.glsl" />
+    <None Include="src\glsl\planet_vertex.glsl" />
     <None Include="src\glsl\sun_fragment.glsl" />
     <None Include="src\glsl\sun_vertex.glsl" />
   </ItemGroup>
