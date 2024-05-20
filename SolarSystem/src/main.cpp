@@ -64,7 +64,7 @@ int main(int, char**) {
     glEnable(GL_CULL_FACE);
     
     Shader shaderLight("src/glsl/sun_vertex.glsl", "src/glsl/sun_fragment.glsl");
-    Shader shaderShadow("src/glsl/test_vertex.glsl", "src/glsl/test_fragment.glsl");
+    Shader shaderShadow("src/glsl/shadow_vertex.glsl", "src/glsl/shadow_fragment.glsl");
     Shader shaderPlanet("src/glsl/planet_vertex.glsl", "src/glsl/planet_fragment.glsl");
     
     
@@ -80,8 +80,10 @@ int main(int, char**) {
     
     Model spaceMap("objects/space/space.obj");
     
-    std::vector<Model> planets{ sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune };
+    std::vector<Model> planets{ mercury, venus, earth, mars, jupiter, saturn, uranus, neptune };
     
+    bindModelVAO(sun);
+
     for (const auto& planet : planets)
     {
         bindModelVAO(planet);
@@ -123,8 +125,11 @@ int main(int, char**) {
 
         processInput(window);
 
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glCullFace(GL_BACK);
+        
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
@@ -150,30 +155,23 @@ int main(int, char**) {
         shaderLight.set("projection", projection);
         shaderLight.set("view", view);
 
-        //shaderPlanet.use();
-        //shaderPlanet.set("projection", projection);
-        //shaderPlanet.set("view", view);
         
         glm::mat4 model = glm::mat4(1.0f);
         
         
-        float distance = 20.0f;
+        float distance = 100.0f;
         for (auto& planet : planets)
         {
             model = glm::mat4(1.0f);
             distance += 100.0f;
-            model = glm::translate(model, glm::vec3(0.0f, -3.0f, distance));
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, distance));
             model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
             shaderLight.set("model", model);
             planet.Draw(shaderLight);
 		}
         
         
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(camera.Position));
-        //model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
-        //shaderPlanet.set("model", model);
-        //spaceMap.Draw(shaderPlanet);
+       
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -191,16 +189,34 @@ int main(int, char**) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
 
-        distance = 20.0f;
+        distance = 100.0f;
         for (auto& planet : planets)
         {
             model = glm::mat4(1.0f);
             distance += 100.0f;
-            model = glm::translate(model, glm::vec3(0.0f, -3.0f, distance));
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, distance));
             model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
             shaderLight.set("model", model);
             planet.Draw(shaderLight);
         }
+
+        
+        shaderPlanet.use();
+        shaderPlanet.set("projection", projection);
+        shaderPlanet.set("view", view);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.f));
+        model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+        shaderPlanet.set("model", model);
+        sun.Draw(shaderPlanet);
+
+        glCullFace(GL_FRONT);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(camera.Position));
+        model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
+        shaderPlanet.set("model", model);
+        spaceMap.Draw(shaderPlanet);
     
         glfwSwapBuffers(window);
         glfwPollEvents();

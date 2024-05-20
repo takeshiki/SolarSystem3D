@@ -58,10 +58,10 @@
     <None Include="src\glsl\planet_vertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="src\glsl\test_fragment.glsl">
+    <None Include="src\glsl\shadow_fragment.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="src\glsl\test_vertex.glsl">
+    <None Include="src\glsl\shadow_vertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
