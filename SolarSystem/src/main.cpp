@@ -64,6 +64,7 @@ int main(int, char**) {
     Shader shaderSun("src/glsl/sun_vertex.glsl", "src/glsl/sun_fragment.glsl");
     Shader shaderPlanet("src/glsl/planet_vertex.glsl", "src/glsl/planet_fragment.glsl");
 
+    
     Model sun("objects/sun/sun.obj");
     Model mercury("objects/mercury/mercury.obj");
     Model venus("objects/venus/venus.obj");
@@ -74,58 +75,14 @@ int main(int, char**) {
     Model uranus("objects/uranus/uranus.obj");
     Model neptune("objects/neptune/neptune.obj");
 
-    //GLuint amount = 10000;
-    //glm::mat4* modelMatrices;
-    //modelMatrices = new glm::mat4[amount];
-    //srand(static_cast<GLuint>(glfwGetTime())); // initialize random seed
-    //float radius = 150.0;
-    //float offset = 25.0f;
-    //for (GLuint i = 0; i < amount; i++)
-    //{
-    //    glm::mat4 model = glm::mat4(1.0f);
-    //    // 1. translation: displace along circle with 'radius' in range [-offset, offset]
-    //    float angle = (float)i / (float)amount * 360.0f;
-    //    float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-    //    float x = sin(angle) * radius + displacement;
-    //    displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-    //    float y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
-    //    displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-    //    float z = cos(angle) * radius + displacement;
-    //    model = glm::translate(model, glm::vec3(x, y, z));
-    //
-    //    // 2. scale: Scale between 0.05 and 0.25f
-    //    float scale = static_cast<float>((rand() % 20) / 100.0 + 0.05);
-    //    model = glm::scale(model, glm::vec3(scale));
-    //
-    //    // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
-    //    float rotAngle = static_cast<float>((rand() % 360));
-    //    model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
-    //
-    //    // 4. now add to list of matrices
-    //    modelMatrices[i] = model;
-    //}
-    //GLuint buffer;
-    //glGenBuffers(1, &buffer);
-    //glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    //glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+    Model space("objects/space/space.obj");
 
-    bindModelVAO(sun);
+    std::vector<Model> planets{ sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune };
 
-    bindModelVAO(mercury);
-
-    bindModelVAO(venus);
-
-    bindModelVAO(earth);
-
-    bindModelVAO(mars);
-
-    bindModelVAO(jupiter);
-
-    bindModelVAO(saturn);
-
-    bindModelVAO(uranus);
-
-    bindModelVAO(neptune);
+    for (auto& planet : planets)
+    {
+        bindModelVAO(planet);
+    }
 
 
     while (!glfwWindowShouldClose(window))
@@ -142,71 +99,30 @@ int main(int, char**) {
 
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        shaderSun.use();
-        shaderSun.set("projection", projection);
-        shaderSun.set("view", view);
+        shaderPlanet.use();
+        shaderPlanet.set("projection", projection);
+        shaderPlanet.set("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-        shaderSun.set("model", model);
-        sun.Draw(shaderSun);
 
-        shaderPlanet.use();
-        shaderPlanet.set("projection", projection);
-        shaderPlanet.set("view", view);
+        float distance = 20.0f;
+        for (auto& planet : planets)
+        {
+            distance += 100.0f;
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, -3.0f, distance));
+            model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+            shaderPlanet.set("model", model);
+            planet.Draw(shaderPlanet);
+		}
+
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 120.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        model = glm::translate(model, glm::vec3(camera.Position));
+        model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
         shaderPlanet.set("model", model);
-        mercury.Draw(shaderPlanet);
-
-        shaderPlanet.use();
-        shaderPlanet.set("projection", projection);
-        shaderPlanet.set("view", view);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 200.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        venus.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 300.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        earth.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 400.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        mars.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 500.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        jupiter.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 600.0f));
-        model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
-        shaderPlanet.set("model", model);  
-        saturn.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 700.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        uranus.Draw(shaderPlanet);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 800.0f));
-        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-        shaderPlanet.set("model", model);
-        neptune.Draw(shaderPlanet);
+        space.Draw(shaderPlanet);
+        
     
         glfwSwapBuffers(window);
         glfwPollEvents();
