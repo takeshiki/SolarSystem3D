@@ -34,8 +34,8 @@
 #for visual studio
 .vs
 .vcxproj
-.vcxproj.filters
-.vcxproj.user
+.filters
+.user
 
 #folders
 
