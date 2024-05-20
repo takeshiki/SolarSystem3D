@@ -36,6 +36,8 @@
     <None Include="src\glsl\planet_vertex.glsl" />
     <None Include="src\glsl\sun_fragment.glsl" />
     <None Include="src\glsl\sun_vertex.glsl" />
+    <None Include="src\glsl\test_fragment.glsl" />
+    <None Include="src\glsl\test_vertex.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
