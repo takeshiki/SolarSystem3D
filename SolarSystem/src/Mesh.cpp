@@ -5,6 +5,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vec
     setupMesh();
 }
 
+
 void Mesh::Draw(Shader& shader)
 {
 	uint32_t diffuseNr = 1;

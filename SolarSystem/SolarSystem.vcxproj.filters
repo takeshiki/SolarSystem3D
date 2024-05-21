@@ -46,10 +46,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\glsl\sun_vertex.glsl">
+    <None Include="src\glsl\sunlight_vertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="src\glsl\sun_fragment.glsl">
+    <None Include="src\glsl\sunlight_fragment.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="src\glsl\planet_fragment.glsl">

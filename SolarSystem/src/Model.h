@@ -29,6 +29,7 @@ public:
 	bool gammaCorrection;
 
 	Model(const std::string& path, bool gamma = false);
+	bool operator==(const Model& other) const;
 
 	void Draw(Shader& shader);
 private:

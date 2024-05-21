@@ -46,6 +46,15 @@ Model::Model(const std::string& path, bool gamma) : gammaCorrection(gamma)
 	loadModel(path);
 }
 
+bool Model::operator==(const Model& other) const
+{
+	if(this->meshes.size() != other.meshes.size())
+	{
+		return false;
+	}
+	return true;
+}
+
 void Model::Draw(Shader& shader)
 {
 	for (uint32_t i = 0; i < meshes.size(); i++) {
@@ -56,7 +65,7 @@ void Model::Draw(Shader& shader)
 void Model::loadModel(const std::string& path)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -96,6 +105,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		vector.y = mesh->mNormals[i].y;
 		vector.z = mesh->mNormals[i].z;
 		vertex.Normal = vector;
+
+		vector.x = mesh->mTangents[i].x;
+		vector.y = mesh->mTangents[i].y;
+		vector.z = mesh->mTangents[i].z;
+		vertex.Tangent = vector; 
 
 		if (mesh->mTextureCoords[0]) {
 			glm::vec2 vec;
