@@ -65,6 +65,8 @@ int main(int, char**) {
 
     glEnable(GL_DEPTH_TEST); 
     glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     Shader shaderSunLight("src/glsl/sunlight_vertex.glsl", "src/glsl/sunlight_fragment.glsl");
     Shader shaderShadow("src/glsl/shadow_vertex.glsl", "src/glsl/shadow_fragment.glsl");
@@ -82,12 +84,22 @@ int main(int, char**) {
     Model neptune("objects/neptune/neptune.obj");
     
     Model spaceMap("objects/space/space.obj");
+
+    Model moon("objects/moon/moon.obj");
+
+    Model saturnCircles("objects/saturn/saturnCircles.obj");
     
     std::vector<Model> planets{ mercury, venus, earth, mars, jupiter, saturn, uranus, neptune };
     std::vector<float> planetSpeedAroundSun { 1.f, 1.3f, 1.6f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f };
     
     
     bindModelVAO(sun);
+
+    bindModelVAO(spaceMap);
+
+    bindModelVAO(moon);
+
+    bindModelVAO(saturnCircles);
 
     for (const auto& planet : planets)
     {
@@ -148,7 +160,7 @@ int main(int, char**) {
             // Move in a circular path
             model = glm::translate(model, glm::vec3((cos(glfwGetTime()/ planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance));
             //model = glm::translate(model, glm::vec3(0.0f, 0.0f, distance));
-            if (planet == earth && planet == mars && planet == saturn) {
+            if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
                 model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
             }
             else
@@ -158,8 +170,17 @@ int main(int, char**) {
             model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f)); 
             shaderSunLight.set("model", model);
             planet.Draw(shaderSunLight);
+            if (counterForPlanetNumber == 5) {
+                saturnCircles.Draw(shaderSunLight);
+            }
             counterForPlanetNumber++;
 		}
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));       
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        shaderSunLight.set("model", model);
+        moon.Draw(shaderSunLight);
+
         
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -186,7 +207,7 @@ int main(int, char**) {
             model = glm::mat4(1.0f);
             distance += 100.0f;
             model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance)); // Move in a circular path
-            if (planet == earth && planet == mars && planet == saturn) {
+            if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
 				model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
 			}
             else
@@ -196,9 +217,17 @@ int main(int, char**) {
             model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
             shaderSunLight.set("model", model);
             planet.Draw(shaderSunLight);
+            if (counterForPlanetNumber == 5) {
+                saturnCircles.Draw(shaderSunLight);
+            }
             counterForPlanetNumber++;
 
         }
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2])), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[2])));
+        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        shaderSunLight.set("model", model);
+        moon.Draw(shaderSunLight);
 
         
         shaderPlanet.use();
