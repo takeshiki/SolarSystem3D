@@ -173,13 +173,21 @@ int main(int, char**) {
             if (counterForPlanetNumber == 5) {
                 saturnCircles.Draw(shaderSunLight);
             }
+            if (counterForPlanetNumber == 2) {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));
+                model = glm::translate(model, glm::vec3(0.f, cos(glfwGetTime()) * 120.f, sin(glfwGetTime())) * 120.f);
+                model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+                shaderSunLight.set("model", model);
+                moon.Draw(shaderSunLight);
+            }
             counterForPlanetNumber++;
 		}
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));       
-        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-        shaderSunLight.set("model", model);
-        moon.Draw(shaderSunLight);
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));       
+        //model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        //shaderSunLight.set("model", model);
+        //moon.Draw(shaderSunLight);
 
         
         
@@ -220,14 +228,22 @@ int main(int, char**) {
             if (counterForPlanetNumber == 5) {
                 saturnCircles.Draw(shaderSunLight);
             }
+            if (counterForPlanetNumber == 2) {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));
+                model = glm::translate(model, glm::vec3(0.f, cos(glfwGetTime()) * 120.f, sin(glfwGetTime())) * 120.f);
+                model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+                shaderSunLight.set("model", model);
+                moon.Draw(shaderSunLight);
+            }
             counterForPlanetNumber++;
 
         }
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2])), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[2])));
-        model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-        shaderSunLight.set("model", model);
-        moon.Draw(shaderSunLight);
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2])), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[2])));
+        //model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+        //shaderSunLight.set("model", model);
+        //moon.Draw(shaderSunLight);
 
         
         shaderPlanet.use();
