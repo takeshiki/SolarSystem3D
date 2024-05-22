@@ -17,6 +17,7 @@ private:
 	Shader m_shaderSunlight;
 	Shader m_shaderDefault;
 
+
 	void bindModelVAO(const Model& model);
 	void bindDepthMapFBO();
 
@@ -24,10 +25,10 @@ private:
 	void renderShadow(glm::mat4 lightSpaceMatrix);
 public:
 	
-	Scene(std::vector<Model> planets, std::map<int, Model> spaceObjects);
+	Scene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderDefault, Shader& shaderSunlight, Shader& shaderShadow);
 
-	void renderScene();
+	void renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition);
 
-	void renderSceneObjects();
+	void renderSceneObjects(glm::mat4& cameraViewMatrix);
 };
 

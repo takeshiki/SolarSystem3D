@@ -71,8 +71,11 @@ void Scene::renderShadow(glm::mat4 lightSpaceMatrix)
     glActiveTexture(GL_TEXTURE0);
 }
 
-Scene::Scene(std::vector<Model> planets, std::map<int, Model> spaceObjects) : m_planets(planets), m_spaceObjects(spaceObjects)
+Scene::Scene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderDefault, Shader& shaderSunlight, Shader& shaderShadow)
+    : m_planets(planets), m_spaceObjects(spaceObjects),
+    m_shaderDefault(shaderDefault), m_shaderSunlight(shaderSunlight), m_shaderShadow(shaderShadow) 
 {
+
 	for (auto& planet : planets)
 	{
 		bindModelVAO(planet);
@@ -83,33 +86,37 @@ Scene::Scene(std::vector<Model> planets, std::map<int, Model> spaceObjects) : m_
 	}
     
     bindDepthMapFBO();
+
+    m_shaderSunlight.use();
+    m_shaderSunlight.set("diffuseTexture", 0);
+    m_shaderSunlight.set("shadowMap", 1);
 }
 
-void Scene::renderScene()
+void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
 {
     glm::mat4 lightSpaceMatrix = generateLightSpaceMatrix();
     renderShadow(lightSpaceMatrix);
 
     m_shaderSunlight.use();
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 view = cameraViewMatrix; // m_camera.GetViewMatrix();
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
     m_shaderSunlight.set("view", view);
 
-    renderSceneObjects(); // render before shadow
+    renderSceneObjects(cameraViewMatrix); // render before shadow
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_shaderSunlight.set("viewPos", camera.Position);
+    m_shaderSunlight.set("viewPos", cameraPosition); //m_camera.Position);
     m_shaderSunlight.set("lightPos", lightPos);
     m_shaderSunlight.set("lightSpaceMatrix", lightSpaceMatrix);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthMap);
 
-    renderSceneObjects(); // render after shadow
+    renderSceneObjects(cameraViewMatrix); // render after shadow
 
     m_shaderDefault.use();
     m_shaderDefault.set("projection", projection);
@@ -123,17 +130,17 @@ void Scene::renderScene()
 
     glCullFace(GL_FRONT);
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(camera.Position));
+    model = glm::translate(model, glm::vec3(cameraPosition)); //m_camera.Position));
     model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
     m_shaderDefault.set("model", model);
     m_spaceObjects[1].Draw(m_shaderDefault); //m_spaceObjects[1] is skybox
 }
 
-void Scene::renderSceneObjects()
+void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
 {
     m_shaderSunlight.use();
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 view = cameraViewMatrix; //m_camera.GetViewMatrix();
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
     m_shaderSunlight.set("view", view);

@@ -1,10 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "Scene.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
-#include "Camera.h"
 #include "Model.h"
 
 #include <iostream>
@@ -21,9 +19,6 @@ glm::mat4 generateLightSpaceMatrix(glm::vec3 lightPos);
 void renderScene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderSunLight, const std::vector<float>& planetSpeedAroundSun);
 void renderShadow(Shader& shaderShadow, glm::mat4& lightSpaceMatrix, GLuint& depthMapFBO);
 
-const GLuint SCR_WIDTH = 1920; 
-const GLuint SCR_HEIGHT = 1080;
-
 Camera camera(glm::vec3(-200.0f, 200.0f, 100.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -32,11 +27,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-
-
-const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
-const glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
 int main(int, char**) {
     
@@ -87,9 +77,7 @@ int main(int, char**) {
     Model neptune("objects/neptune/neptune.obj");
     
     Model spaceMap("objects/space/space.obj");
-
     Model moon("objects/moon/moon.obj");
-
     Model saturnCircles("objects/saturn/saturnCircles.obj");
     
     std::vector<Model> planets{ mercury, venus, earth, mars, jupiter, saturn, uranus, neptune};
@@ -99,29 +87,25 @@ int main(int, char**) {
         {5, saturnCircles},
         {1, spaceMap}
     };
-    std::vector<float> planetSpeedAroundSun { 1.f, 1.3f, 1.6f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f };
+    Scene scene(planets, spaceObjects, shaderPlanet, shaderSunLight, shaderShadow);
     
-    for(const auto &it : spaceObjects)
-	{
-        bindModelVAO(it.second);
-	}
+    //for(const auto &it : spaceObjects)
+	//{
+    //    bindModelVAO(it.second);
+	//}
     
-    //bindModelVAO(sun);
-    //bindModelVAO(spaceMap);
-    //bindModelVAO(moon);
-    //bindModelVAO(saturnCircles);
 
-    for (const auto& planet : planets)
-    {
-        bindModelVAO(planet);
-    }
+    //for (const auto& planet : planets)
+    //{
+    //    bindModelVAO(planet);
+    //}
     
-    unsigned int depthMapFBO, depthMap;
-    bindDepthMapFBO(depthMapFBO, depthMap);
+    //unsigned int depthMapFBO, depthMap;
+    //bindDepthMapFBO(depthMapFBO, depthMap);
     
-    shaderSunLight.use();
-    shaderSunLight.set("diffuseTexture", 0);
-    shaderSunLight.set("shadowMap", 1);
+    //shaderSunLight.use();
+    //shaderSunLight.set("diffuseTexture", 0);
+    //shaderSunLight.set("shadowMap", 1);
 
 
     while (!glfwWindowShouldClose(window))
@@ -133,55 +117,57 @@ int main(int, char**) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glCullFace(GL_BACK);
+
+        scene.renderScene(camera.GetViewMatrix(), camera.Position);
         
-        auto lightSpaceMatrix = generateLightSpaceMatrix(lightPos);
-
-        renderShadow(shaderShadow, lightSpaceMatrix, depthMapFBO);
-       
-        shaderSunLight.use();
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        shaderSunLight.set("projection", projection);
-        shaderSunLight.set("view", view);
-
-        renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        //auto lightSpaceMatrix = generateLightSpaceMatrix(lightPos);
+        //
+        //renderShadow(shaderShadow, lightSpaceMatrix, depthMapFBO);
+        //
         //shaderSunLight.use();
-        //projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-        //view = camera.GetViewMatrix();
+        //glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
+        //glm::mat4 view = camera.GetViewMatrix();
+        //glm::mat4 model = glm::mat4(1.0f);
         //shaderSunLight.set("projection", projection);
         //shaderSunLight.set("view", view);
-
-        // set light uniforms
-        shaderSunLight.set("viewPos", camera.Position);
-        shaderSunLight.set("lightPos", lightPos);
-        shaderSunLight.set("lightSpaceMatrix", lightSpaceMatrix);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-
-        renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
-        
-        shaderPlanet.use();
-        shaderPlanet.set("projection", projection);
-        shaderPlanet.set("view", view);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.f));
-        model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
-        shaderPlanet.set("model", model);
-        sun.Draw(shaderPlanet);
-
-        glCullFace(GL_FRONT);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(camera.Position));
-        model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
-        shaderPlanet.set("model", model);
-        spaceMap.Draw(shaderPlanet);
+        //
+        //renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
+        //
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //
+        ////shaderSunLight.use();
+        ////projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
+        ////view = camera.GetViewMatrix();
+        ////shaderSunLight.set("projection", projection);
+        ////shaderSunLight.set("view", view);
+        //
+        //// set light uniforms
+        //shaderSunLight.set("viewPos", camera.Position);
+        //shaderSunLight.set("lightPos", lightPos);
+        //shaderSunLight.set("lightSpaceMatrix", lightSpaceMatrix);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, depthMap);
+        //
+        //renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
+        //
+        //shaderPlanet.use();
+        //shaderPlanet.set("projection", projection);
+        //shaderPlanet.set("view", view);
+        //
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.f));
+        //model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+        //shaderPlanet.set("model", model);
+        //sun.Draw(shaderPlanet);
+        //
+        //glCullFace(GL_FRONT);
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(camera.Position));
+        //model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
+        //shaderPlanet.set("model", model);
+        //spaceMap.Draw(shaderPlanet);
     
         glfwSwapBuffers(window);
         glfwPollEvents();
