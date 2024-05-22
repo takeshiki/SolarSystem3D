@@ -60,7 +60,6 @@ int main(int, char**) {
     Shader shaderShadow("src/glsl/shadow_vertex.glsl", "src/glsl/shadow_fragment.glsl");
     Shader shaderPlanet("src/glsl/planet_vertex.glsl", "src/glsl/planet_fragment.glsl");
     
-    
     Model sun("objects/sun/sun.obj");
     Model mercury("objects/mercury/mercury.obj");
     Model venus("objects/venus/venus.obj");
@@ -95,12 +94,11 @@ int main(int, char**) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glCullFace(GL_BACK);
 
-        scene.renderScene(camera.GetViewMatrix(), camera.Position);
+        scene.renderScene(camera.GetViewMatrix(), camera.Position);// опрацювання сцени
         
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
     glfwTerminate();
     return 0;
 }

@@ -98,8 +98,8 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
     renderShadow(lightSpaceMatrix);
 
     m_shaderSunlight.use();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-    glm::mat4 view = cameraViewMatrix; // m_camera.GetViewMatrix();
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
+    glm::mat4 view = cameraViewMatrix;
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
     m_shaderSunlight.set("view", view);
@@ -110,7 +110,7 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_shaderSunlight.set("viewPos", cameraPosition); //m_camera.Position);
+    m_shaderSunlight.set("viewPos", cameraPosition);
     m_shaderSunlight.set("lightPos", lightPos);
     m_shaderSunlight.set("lightSpaceMatrix", lightSpaceMatrix);
     glActiveTexture(GL_TEXTURE0);
@@ -126,21 +126,21 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.f));
     model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
     m_shaderDefault.set("model", model);
-    m_spaceObjects[0].Draw(m_shaderDefault); // m_spaceObjects[0] is sun
+    m_spaceObjects[SUN].Draw(m_shaderDefault);
 
     glCullFace(GL_FRONT);
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(cameraPosition)); //m_camera.Position));
+    model = glm::translate(model, glm::vec3(cameraPosition));
     model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
     m_shaderDefault.set("model", model);
-    m_spaceObjects[1].Draw(m_shaderDefault); //m_spaceObjects[1] is skybox
+    m_spaceObjects[SPACE_MAP].Draw(m_shaderDefault);
 }
 
 void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
 {
     m_shaderSunlight.use();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-    glm::mat4 view = cameraViewMatrix; //m_camera.GetViewMatrix();
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
+    glm::mat4 view = cameraViewMatrix;
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
     m_shaderSunlight.set("view", view);
@@ -153,9 +153,9 @@ void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
         distance += 100.0f;
         // Move in a circular path
         model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance));
-        if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
+        if (counterForPlanetNumber == EARTH || counterForPlanetNumber == MARS || counterForPlanetNumber == SATURN) {
             model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
-        }
+        }//якщо земля, марс або сатурн то переміщаємо вісь обертання
         else
         {
             model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
@@ -163,15 +163,15 @@ void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
         model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
         m_shaderSunlight.set("model", model);
         planet.Draw(m_shaderSunlight);
-        if (counterForPlanetNumber == 5) {
-            m_spaceObjects[counterForPlanetNumber].Draw(m_shaderSunlight);
+        if (counterForPlanetNumber == SATURN) {
+            m_spaceObjects[SATURN_CIRCLES].Draw(m_shaderSunlight);
         }
-        if (counterForPlanetNumber == 2) {
+        if (counterForPlanetNumber == EARTH) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * distance) + 30.f, 30.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * distance));
             model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
             m_shaderSunlight.set("model", model);
-            m_spaceObjects[counterForPlanetNumber].Draw(m_shaderSunlight);
+            m_spaceObjects[MOON].Draw(m_shaderSunlight);
         }
         counterForPlanetNumber++;
     }
