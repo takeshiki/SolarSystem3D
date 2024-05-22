@@ -1,12 +1,11 @@
 #pragma once
 
-#include<vector>
+#include <vector>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "Model.h"
-
-const std::vector<float> planetSpeedAroundSun { 1.f, 1.3f, 1.6f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f };
-
-const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+#include "GlobalVariables.h"
 
 class Scene
 {
@@ -14,10 +13,21 @@ private:
 	std::vector<Model> m_planets;
 	std::map<int, Model> m_spaceObjects;
 	GLuint depthMapFBO, depthMap;
-public:
+	Shader m_shaderShadow;
+	Shader m_shaderSunlight;
+	Shader m_shaderDefault;
+
 	void bindModelVAO(const Model& model);
 	void bindDepthMapFBO();
+
+	glm::mat4 generateLightSpaceMatrix();
+	void renderShadow(glm::mat4 lightSpaceMatrix);
+public:
 	
 	Scene(std::vector<Model> planets, std::map<int, Model> spaceObjects);
+
+	void renderScene();
+
+	void renderSceneObjects();
 };
 

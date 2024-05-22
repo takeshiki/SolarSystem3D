@@ -14,8 +14,8 @@ class Shader
 public:
 	GLuint ID;
 
+	Shader() = default;
 	Shader(const std::string vertexPath, const std::string fragmentPath);
-
 	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 
 	void use();

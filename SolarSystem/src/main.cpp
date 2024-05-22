@@ -20,7 +20,6 @@ void createFPS();
 glm::mat4 generateLightSpaceMatrix(glm::vec3 lightPos);
 void renderScene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderSunLight, const std::vector<float>& planetSpeedAroundSun);
 void renderShadow(Shader& shaderShadow, glm::mat4& lightSpaceMatrix, GLuint& depthMapFBO);
-void renderSunlight(Shader& shaderSunLight);
 
 const GLuint SCR_WIDTH = 1920; 
 const GLuint SCR_HEIGHT = 1080;
@@ -146,19 +145,17 @@ int main(int, char**) {
         shaderSunLight.set("projection", projection);
         shaderSunLight.set("view", view);
 
-        renderSunlight(shaderSunLight);
-
         renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shaderSunLight.use();
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-        view = camera.GetViewMatrix();
-        shaderSunLight.set("projection", projection);
-        shaderSunLight.set("view", view);
+        //shaderSunLight.use();
+        //projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
+        //view = camera.GetViewMatrix();
+        //shaderSunLight.set("projection", projection);
+        //shaderSunLight.set("view", view);
 
         // set light uniforms
         shaderSunLight.set("viewPos", camera.Position);
@@ -368,14 +365,4 @@ void renderShadow(Shader& shaderShadow, glm::mat4& lightSpaceMatrix, GLuint& dep
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glClear(GL_DEPTH_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
-}
-
-void renderSunlight(Shader& shaderSunLight)
-{
-    shaderSunLight.use();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
-    glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 model = glm::mat4(1.0f);
-    shaderSunLight.set("projection", projection);
-    shaderSunLight.set("view", view);
 }
