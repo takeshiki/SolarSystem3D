@@ -14,13 +14,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void bindModelVAO(Model model);
+void bindModelVAO(const Model& model);
 void bindDepthMapFBO(unsigned int& depthMapFBO, unsigned int& depthMap);
 void createFPS();
 glm::mat4 generateLightSpaceMatrix(glm::vec3 lightPos);
+void renderScene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderSunLight, const std::vector<float>& planetSpeedAroundSun);
+void renderShadow(Shader& shaderShadow, glm::mat4& lightSpaceMatrix, GLuint& depthMapFBO);
+void renderSunlight(Shader& shaderSunLight);
 
-const unsigned int SCR_WIDTH = 1920; 
-const unsigned int SCR_HEIGHT = 1080;
+const GLuint SCR_WIDTH = 1920; 
+const GLuint SCR_HEIGHT = 1080;
 
 Camera camera(glm::vec3(-200.0f, 200.0f, 100.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -32,8 +35,9 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
-const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
+const glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
 int main(int, char**) {
     
@@ -89,23 +93,29 @@ int main(int, char**) {
 
     Model saturnCircles("objects/saturn/saturnCircles.obj");
     
-    std::vector<Model> planets{ mercury, venus, earth, mars, jupiter, saturn, uranus, neptune };
+    std::vector<Model> planets{ mercury, venus, earth, mars, jupiter, saturn, uranus, neptune};
+    std::map<int, Model> spaceObjects{
+        {0 , sun },
+        {2 , moon},
+        {5, saturnCircles},
+        {1, spaceMap}
+    };
     std::vector<float> planetSpeedAroundSun { 1.f, 1.3f, 1.6f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f };
     
+    for(const auto &it : spaceObjects)
+	{
+        bindModelVAO(it.second);
+	}
     
-    bindModelVAO(sun);
-
-    bindModelVAO(spaceMap);
-
-    bindModelVAO(moon);
-
-    bindModelVAO(saturnCircles);
+    //bindModelVAO(sun);
+    //bindModelVAO(spaceMap);
+    //bindModelVAO(moon);
+    //bindModelVAO(saturnCircles);
 
     for (const auto& planet : planets)
     {
         bindModelVAO(planet);
     }
-    
     
     unsigned int depthMapFBO, depthMap;
     bindDepthMapFBO(depthMapFBO, depthMap);
@@ -114,33 +124,21 @@ int main(int, char**) {
     shaderSunLight.set("diffuseTexture", 0);
     shaderSunLight.set("shadowMap", 1);
 
-    glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
     while (!glfwWindowShouldClose(window))
     {
-
         createFPS();
 
         processInput(window);
-
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glCullFace(GL_BACK);
         
-
         auto lightSpaceMatrix = generateLightSpaceMatrix(lightPos);
 
-        // render scene from light's point of view
-        shaderShadow.use();
-        shaderShadow.set("lightSpaceMatrix", lightSpaceMatrix);
-
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glActiveTexture(GL_TEXTURE0);
+        renderShadow(shaderShadow, lightSpaceMatrix, depthMapFBO);
        
-        
         shaderSunLight.use();
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -148,48 +146,9 @@ int main(int, char**) {
         shaderSunLight.set("projection", projection);
         shaderSunLight.set("view", view);
 
-        
-        
-        
-        float distance = 100.0f;
-        int counterForPlanetNumber = 0;
-        for (auto& planet : planets)
-        {
-            model = glm::mat4(1.0f);
-            distance += 100.0f;
-            // Move in a circular path
-            model = glm::translate(model, glm::vec3((cos(glfwGetTime()/ planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance));
-            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, distance));
-            if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
-                model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
-            }
-            else
-            {
-                model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
-            }
-            model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f)); 
-            shaderSunLight.set("model", model);
-            planet.Draw(shaderSunLight);
-            if (counterForPlanetNumber == 5) {
-                saturnCircles.Draw(shaderSunLight);
-            }
-            if (counterForPlanetNumber == 2) {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));
-                model = glm::translate(model, glm::vec3(0.f, cos(glfwGetTime()) * 120.f, sin(glfwGetTime())) * 120.f);
-                model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-                shaderSunLight.set("model", model);
-                moon.Draw(shaderSunLight);
-            }
-            counterForPlanetNumber++;
-		}
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));       
-        //model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-        //shaderSunLight.set("model", model);
-        //moon.Draw(shaderSunLight);
+        renderSunlight(shaderSunLight);
 
-        
+        renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -208,43 +167,7 @@ int main(int, char**) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
 
-        distance = 100.0f;
-        counterForPlanetNumber = 0;
-        for (auto& planet : planets)
-        {
-            model = glm::mat4(1.0f);
-            distance += 100.0f;
-            model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance)); // Move in a circular path
-            if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
-				model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
-			}
-            else
-            {
-				model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
-			}
-            model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-            shaderSunLight.set("model", model);
-            planet.Draw(shaderSunLight);
-            if (counterForPlanetNumber == 5) {
-                saturnCircles.Draw(shaderSunLight);
-            }
-            if (counterForPlanetNumber == 2) {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));
-                model = glm::translate(model, glm::vec3(0.f, cos(glfwGetTime()) * 120.f, sin(glfwGetTime())) * 120.f);
-                model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-                shaderSunLight.set("model", model);
-                moon.Draw(shaderSunLight);
-            }
-            counterForPlanetNumber++;
-
-        }
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f) + 30.f, 40.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * 400.f));model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2])), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[2])));
-        //model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-        //shaderSunLight.set("model", model);
-        //moon.Draw(shaderSunLight);
-
+        renderScene(planets, spaceObjects, shaderSunLight, planetSpeedAroundSun);
         
         shaderPlanet.use();
         shaderPlanet.set("projection", projection);
@@ -268,10 +191,6 @@ int main(int, char**) {
     }
 
     glfwTerminate();
-    
-
-
-
     return 0;
 }
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -332,7 +251,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-void bindModelVAO(Model model)
+void bindModelVAO(const Model& model)
 {
     for (GLuint i = 0; i < model.meshes.size(); i++)
     {
@@ -396,4 +315,67 @@ glm::mat4 generateLightSpaceMatrix(glm::vec3 lightPos)
     lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
     lightSpaceMatrix = lightProjection * lightView;
     return lightSpaceMatrix;
+}
+
+void renderScene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderSunLight, const std::vector<float>& planetSpeedAroundSun)
+{
+    shaderSunLight.use();
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 model = glm::mat4(1.0f);
+    shaderSunLight.set("projection", projection);
+    shaderSunLight.set("view", view);
+
+    float distance = 100.0f;
+    int counterForPlanetNumber = 0;
+    for (auto& planet : planets)
+    {
+        model = glm::mat4(1.0f);
+        distance += 100.0f;
+        // Move in a circular path
+        model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance));
+        if (counterForPlanetNumber == 2 || counterForPlanetNumber == 3 || counterForPlanetNumber == 5) {
+            model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
+        }
+        else
+        {
+            model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
+        }
+        model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        shaderSunLight.set("model", model);
+        planet.Draw(shaderSunLight);
+        if (counterForPlanetNumber == 5) {
+            spaceObjects[counterForPlanetNumber].Draw(shaderSunLight);
+        }
+        if (counterForPlanetNumber == 2) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[2]) * distance) + 30.f, 30.0f, sin(glfwGetTime() / planetSpeedAroundSun[2]) * distance));
+            model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+            shaderSunLight.set("model", model);
+            spaceObjects[counterForPlanetNumber].Draw(shaderSunLight);
+        }
+        counterForPlanetNumber++;
+    }
+}
+
+void renderShadow(Shader& shaderShadow, glm::mat4& lightSpaceMatrix, GLuint& depthMapFBO)
+{
+    // render scene from light's point of view
+    shaderShadow.use();
+    shaderShadow.set("lightSpaceMatrix", lightSpaceMatrix);
+
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glActiveTexture(GL_TEXTURE0);
+}
+
+void renderSunlight(Shader& shaderSunLight)
+{
+    shaderSunLight.use();
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 60000.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 model = glm::mat4(1.0f);
+    shaderSunLight.set("projection", projection);
+    shaderSunLight.set("view", view);
 }

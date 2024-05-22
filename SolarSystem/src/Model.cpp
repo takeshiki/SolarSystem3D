@@ -46,6 +46,8 @@ Model::Model(const std::string& path, bool gamma) : gammaCorrection(gamma)
 	loadModel(path);
 }
 
+
+
 bool Model::operator==(const Model& other) const
 {
 	if(this->meshes.size() != other.meshes.size())
