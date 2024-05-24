@@ -97,7 +97,7 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
     renderShadow(lightSpaceMatrix);
 
     m_shaderSunlight.use();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 150000.0f);
     glm::mat4 view = cameraViewMatrix;
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
@@ -130,7 +130,7 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
     glCullFace(GL_FRONT);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(cameraPosition));
-    model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
+    model = glm::scale(model, glm::vec3(150.0f, 150.0f, 150.0f));
     m_shaderDefault.set("model", model);
     m_spaceObjects[SPACE_MAP].Draw(m_shaderDefault);
 }
@@ -138,7 +138,7 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
 void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
 {// πενδεπ ξα'Ίκς³β ρφενθ
     m_shaderSunlight.use();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 150000.0f);
     glm::mat4 view = cameraViewMatrix;
     glm::mat4 model = glm::mat4(1.0f);
     m_shaderSunlight.set("projection", projection);
