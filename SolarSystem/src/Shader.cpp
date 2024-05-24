@@ -3,8 +3,6 @@
 
 Shader::Shader(const std::string vertexPath, const std::string fragmentPath)
 {
-	//const std::string vertexPath = fullVertexPath.substr(fullVertexPath.find_last_of("/\\") + 1);
-	//const std::string fragmentPath = fullFragmentPath.substr(fullFragmentPath.find_last_of("/\\") + 1);
 
 	std::string vertexCode;
 	std::string fragmentCode;	

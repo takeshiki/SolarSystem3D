@@ -1,7 +1,7 @@
 #include "Scene.h"
 
 void Scene::bindModelVAO(const Model& model)
-{
+{// прив'язка VAO для моделі
     for (GLuint i = 0; i < model.meshes.size(); i++)
     {
         GLuint VAO = model.meshes[i].VAO;
@@ -26,7 +26,7 @@ void Scene::bindModelVAO(const Model& model)
 }
 
 void Scene::bindDepthMapFBO()
-{
+{// створити FBO для тіней
     glGenFramebuffers(1, &depthMapFBO);
     // create depth texture
     glGenTextures(1, &depthMap);
@@ -48,7 +48,7 @@ void Scene::bindDepthMapFBO()
 }
 
 glm::mat4 Scene::generateLightSpaceMatrix()
-{
+{// згенерувати матрицю для тіней
     glm::mat4 lightProjection, lightView;
     glm::mat4 lightSpaceMatrix;
     float near_plane = 1.0f, far_plane = 7.5f;
@@ -60,8 +60,7 @@ glm::mat4 Scene::generateLightSpaceMatrix()
 }
 
 void Scene::renderShadow(glm::mat4 lightSpaceMatrix)
-{
-    // render scene from light's point of view
+{// рендер тіней з точки зору світла
     m_shaderShadow.use();
     m_shaderShadow.set("lightSpaceMatrix", lightSpaceMatrix);
 
@@ -74,7 +73,7 @@ void Scene::renderShadow(glm::mat4 lightSpaceMatrix)
 Scene::Scene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Shader& shaderDefault, Shader& shaderSunlight, Shader& shaderShadow)
     : m_planets(planets), m_spaceObjects(spaceObjects),
     m_shaderDefault(shaderDefault), m_shaderSunlight(shaderSunlight), m_shaderShadow(shaderShadow) 
-{
+{// конструктор сцени
 
 	for (auto& planet : planets)
 	{
@@ -93,7 +92,7 @@ Scene::Scene(std::vector<Model>& planets, std::map<int, Model>& spaceObjects, Sh
 }
 
 void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
-{
+{// рендер сцени
     glm::mat4 lightSpaceMatrix = generateLightSpaceMatrix();
     renderShadow(lightSpaceMatrix);
 
@@ -137,7 +136,7 @@ void Scene::renderScene(glm::mat4 cameraViewMatrix, glm::vec3& cameraPosition)
 }
 
 void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
-{
+{// рендер об'єктів сцени
     m_shaderSunlight.use();
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
     glm::mat4 view = cameraViewMatrix;
@@ -151,7 +150,7 @@ void Scene::renderSceneObjects(glm::mat4& cameraViewMatrix)
     {
         model = glm::mat4(1.0f);
         distance += 100.0f;
-        // Move in a circular path
+        // рухати планети по колу
         model = glm::translate(model, glm::vec3((cos(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance), 0.0f, sin(glfwGetTime() / planetSpeedAroundSun[counterForPlanetNumber]) * distance));
         if (counterForPlanetNumber == EARTH || counterForPlanetNumber == MARS || counterForPlanetNumber == SATURN) {
             model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 20.0f), glm::vec3(0.2f, 1.0f, 0.0f)); // Rotate around Y-axis
