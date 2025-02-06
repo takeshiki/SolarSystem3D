@@ -1,5 +1,7 @@
 # 🌍 Solar System 3D Simulation
 
+![Це мій GIF](demo/system.gif)
+
 ## 📌 Overview
 Developed a **realistic 3D simulation** of planetary movements, incorporating physics-based orbital mechanics and interactive camera controls to enhance user experience.
 
